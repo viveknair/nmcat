@@ -1,6 +1,6 @@
 # nmcat - Node Modules Package Content Copier
 
-A command-line tool that copies node module package contents to your clipboard using [llmcat](https://github.com/kevincharm/llmcat).
+A command-line tool that copies node module package contents to your clipboard using [llmcat](https://github.com/azer/llmcat).
 
 ## Features
 
