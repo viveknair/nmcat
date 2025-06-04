@@ -1,23 +1,24 @@
-# nmcat - Node Module Cat
+# nmcat - Node Modules Package Content Copier
 
-A command-line utility that copies node module package contents to clipboard using [llmcat](https://github.com/azer/llmcat).
+A command-line tool that copies node module package contents to your clipboard using [llmcat](https://github.com/kevincharm/llmcat).
 
 ## Features
 
-- Automatically finds `node_modules` by searching up the directory tree
-- Uses `llmcat` for processing and copying package contents
-- Supports all `llmcat` options
-- Fish shell completions for installed packages
+- 🔍 Automatically finds `node_modules` by searching up the directory tree
+- 📋 Copies package contents to clipboard for easy sharing
+- 🐟 Smart Fish shell completions with instant response
+- 🚀 Supports all llmcat options (print, tree view, ignore patterns, etc.)
 
 ## Installation
 
 ```bash
-# Clone this repository
-cd /Users/vivek/Code/nmcat
-
-# Run the install script
 ./install.sh
 ```
+
+The installer will:
+
+1. Create a symlink in `/usr/local/bin/nmcat`
+2. Install smart Fish completions (if Fish is detected)
 
 ## Usage
 
@@ -33,10 +34,22 @@ nmcat -t react
 
 # Print without copying to clipboard
 nmcat -P axios
-
-# Handle scoped packages
-nmcat @types/node
 ```
+
+## Fish Completions
+
+The Fish completions are optimized for performance, even with thousands of packages:
+
+- **Instant response**: Shows common packages on first tab (no filesystem scanning)
+- **Smart filtering**: As you type, uses efficient filtering to find matches
+- **Scoped packages**: Handles `@scope/package` format intelligently
+
+### How it works:
+
+- Press `Tab` with empty input → Shows common packages instantly
+- Type `exp` + `Tab` → Filters to packages starting with "exp"
+- Type `@types/` + `Tab` → Shows only packages in the @types scope
+- Type `@ty` + `Tab` → Shows matching scopes with example packages
 
 ## Options
 
@@ -45,26 +58,15 @@ nmcat @types/node
 - `-p, --print` - Print copied files/content, and also copy to clipboard
 - `-P, --print-only` - Print copied files/content, but DON'T copy to clipboard
 - `-t, --tree-only` - Only output directory tree
-- `-i, --ignore PATTERN` - Additional ignore patterns (fd exclude format)
+- `-i, --ignore PATTERN` - Additional ignore patterns
 - `-H, --hidden` - Include hidden files/directories
 - `--debug` - Enable debug output
 
-## Fish Completions
-
-The fish completions will be automatically installed if fish is detected. They provide tab completion for:
-- All installed packages in the nearest `node_modules`
-- Scoped packages (e.g., `@types/node`)
-- Command options
-
 ## Requirements
 
-- `llmcat` must be installed at `/Users/vivek/Code/llmcat/llmcat`
-- `bash` shell
-- `pbcopy` (macOS) or `xclip`/`xsel` (Linux) for clipboard support
+- [llmcat](https://github.com/kevincharm/llmcat) must be installed
+- Fish shell (optional, for completions)
 
-## How It Works
+## License
 
-1. `nmcat` searches up the directory tree to find the nearest `node_modules` directory
-2. It looks for the specified package (including scoped packages)
-3. It calls `llmcat` with the package directory and any provided options
-4. The package contents are copied to clipboard (or printed, based on options)
+MIT

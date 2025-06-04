@@ -42,6 +42,10 @@ if command -v fish >/dev/null 2>&1; then
             sudo cp "$FISH_COMPLETIONS_PATH" "$FISH_COMP_DIR/"
         fi
         echo "✓ Fish completions installed to $FISH_COMP_DIR"
+        echo "  Features:"
+        echo "  - Instant response (no scanning on initial tab)"
+        echo "  - Smart filtering as you type"
+        echo "  - Handles scoped packages like @types/node"
         echo "  Restart your fish shell or run 'source $FISH_COMP_DIR/nmcat.fish' to enable completions"
     else
         echo "Warning: Fish is installed but completions directory not found"

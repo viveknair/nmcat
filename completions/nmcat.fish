@@ -1,37 +1,7 @@
-# Fish shell completions for nmcat
+# Fastest Fish shell completions for nmcat
+# Optimized for minimal latency even with thousands of packages
 
-# Function to get available node packages
-function __nmcat_get_packages
-    # Search up the directory tree for node_modules
-    set -l current_dir $PWD
-    
-    while test "$current_dir" != "/"
-        if test -d "$current_dir/node_modules"
-            # List all packages, including scoped packages
-            for pkg in $current_dir/node_modules/*
-                if test -d "$pkg"
-                    set -l pkg_name (basename "$pkg")
-                    if string match -q '@*' -- "$pkg_name"
-                        # Handle scoped packages
-                        for scoped_pkg in $pkg/*
-                            if test -d "$scoped_pkg"
-                                echo "$pkg_name/"(basename "$scoped_pkg")
-                            end
-                        end
-                    else
-                        echo "$pkg_name"
-                    end
-                end
-            end
-            return 0
-        end
-        set current_dir (dirname "$current_dir")
-    end
-    
-    return 1
-end
-
-# Disable file completions for nmcat
+# Disable file completions
 complete -c nmcat -f
 
 # Options
@@ -44,5 +14,68 @@ complete -c nmcat -s i -l ignore -d "Additional ignore patterns" -x
 complete -c nmcat -s H -l hidden -d "Include hidden files/directories"
 complete -c nmcat -l debug -d "Enable debug output"
 
-# Package name completion - only suggest when no package has been specified yet
-complete -c nmcat -n "not __fish_seen_subcommand_from (__nmcat_get_packages)" -a "(__nmcat_get_packages)" -d "Node module package"
+# Fastest package completion with smart filtering
+function __nmcat_fastest_packages
+    # Get what the user has typed so far
+    set -l token (commandline -ct)
+    
+    # Find node_modules directory
+    set -l dir $PWD
+    while test "$dir" != "/"
+        if test -d "$dir/node_modules"
+            set -l nm "$dir/node_modules"
+            
+            # If user has typed something, use smart filtering
+            if test -n "$token"
+                # If token starts with @, only search in scoped packages
+                if string match -q "@*" "$token"
+                    # Extract scope if user typed @scope/
+                    if string match -q "*/*" "$token"
+                        set -l scope (string split "/" "$token")[1]
+                        set -l pkg_prefix (string split "/" "$token")[2]
+                        # List only packages in that specific scope
+                        if test -d "$nm/$scope"
+                            command ls -1 "$nm/$scope" 2>/dev/null | while read -l pkg
+                                if string match -q "$pkg_prefix*" "$pkg"
+                                    echo "$scope/$pkg"
+                                end
+                            end | head -20
+                        end
+                    else
+                        # List matching scopes - use a safer approach
+                        command ls -1 "$nm" 2>/dev/null | while read -l entry
+                            if string match -q "$token*" "$entry"
+                                # It's a matching scope - show it and first few packages
+                                echo "$entry/"
+                                if test -d "$nm/$entry"
+                                    command ls -1 "$nm/$entry" 2>/dev/null | head -2 | while read -l pkg
+                                        echo "$entry/$pkg"
+                                    end
+                                end
+                            end
+                        end | head -30
+                    end
+                else
+                    # Regular package - filter results instead of using wildcards
+                    command ls -1 "$nm" 2>/dev/null | while read -l entry
+                        if string match -q "$token*" "$entry"; and not string match -q ".*" "$entry"
+                            echo "$entry"
+                        end
+                    end | head -20
+                end
+            else
+                # No token - show a curated list of common packages
+                # This avoids the slow full scan on initial tab press
+                echo -e "express\nlodash\nreact\nvue\n@types/\n@babel/\n@testing-library/\naxios\ntypescript\njest"
+                echo "... (type to filter packages)"
+            end
+            
+            return 0
+        end
+        set dir (dirname "$dir")
+    end
+    return 1
+end
+
+# Only complete if no argument provided yet
+complete -c nmcat -n "__fish_is_first_token; or not __fish_seen_argument" -a "(__nmcat_fastest_packages)" -d "Package" 
