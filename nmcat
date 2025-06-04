@@ -1,0 +1,202 @@
+#!/bin/bash
+
+# nmcat - Node modules package content copier using llmcat
+# Version: 1.0.0
+
+set -eo pipefail
+
+VERSION="1.0.0"
+LLMCAT_PATH="/Users/vivek/Code/llmcat/llmcat"
+
+# Help text
+show_help() {
+    cat << EOF
+nmcat - Copy node module package contents to clipboard using llmcat
+
+Usage: nmcat [options] <package-name>
+
+Options:
+    -h, --help              Show this help message
+    -v, --version           Show version
+    -p, --print             Print copied files/content, and also copy to clipboard
+    -P, --print-only        Print copied files/content, but DON'T copy to clipboard
+    -t, --tree-only         Only output directory tree
+    -i, --ignore PATTERN    Additional ignore patterns (fd exclude format: glob pattern)
+    -H, --hidden            Include hidden files/directories
+    --debug                 Enable debug output
+
+Examples:
+    # Copy package contents to clipboard
+    nmcat express
+
+    # Print package contents while copying
+    nmcat -p lodash
+
+    # Only show directory tree
+    nmcat -t react
+
+    # Print without copying to clipboard
+    nmcat -P axios
+
+Features:
+    - Automatically finds node_modules by searching up the directory tree
+    - Uses llmcat for processing and copying
+    - Supports all llmcat options
+    - Fish shell completions for installed packages
+
+EOF
+}
+
+# Debug helper
+debug() {
+    if [ "$DEBUG" = "true" ]; then
+        printf "DEBUG: %s\n" "$*" >&2
+    fi
+}
+
+# Find node_modules directory by searching up the tree
+find_node_modules() {
+    local current_dir="$PWD"
+    
+    debug "Starting node_modules search from: $current_dir"
+    
+    while [ "$current_dir" != "/" ]; do
+        debug "Checking for node_modules in: $current_dir"
+        if [ -d "$current_dir/node_modules" ]; then
+            debug "Found node_modules at: $current_dir/node_modules"
+            echo "$current_dir/node_modules"
+            return 0
+        fi
+        current_dir=$(dirname "$current_dir")
+    done
+    
+    debug "No node_modules found in any parent directory"
+    return 1
+}
+
+# Check if package exists in node_modules
+check_package_exists() {
+    local node_modules="$1"
+    local package_name="$2"
+    
+    debug "Checking for package: $package_name in $node_modules"
+    
+    # Direct check
+    if [ -d "$node_modules/$package_name" ]; then
+        debug "Found package at: $node_modules/$package_name"
+        echo "$node_modules/$package_name"
+        return 0
+    fi
+    
+    # Check for scoped packages
+    if [[ "$package_name" == @*/* ]]; then
+        debug "Package appears to be scoped: $package_name"
+        if [ -d "$node_modules/$package_name" ]; then
+            debug "Found scoped package at: $node_modules/$package_name"
+            echo "$node_modules/$package_name"
+            return 0
+        fi
+    else
+        # Check if it might be a scoped package without the @ prefix
+        debug "Checking scoped directories for: $package_name"
+        for scope_dir in "$node_modules"/@*/; do
+            if [ -d "$scope_dir$package_name" ]; then
+                debug "Found in scope: $scope_dir$package_name"
+                echo "$scope_dir$package_name"
+                return 0
+            fi
+        done
+    fi
+    
+    debug "Package not found: $package_name"
+    return 1
+}
+
+# Main function
+main() {
+    local package_name=""
+    local llmcat_opts=()
+    local DEBUG="false"
+    
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help) 
+                show_help
+                exit 0 
+                ;;
+            -v|--version) 
+                echo "nmcat version $VERSION"
+                exit 0 
+                ;;
+            --debug)
+                DEBUG="true"
+                llmcat_opts+=("$1")
+                shift
+                ;;
+            -p|--print|-P|--print-only|-t|--tree-only|-H|--hidden)
+                llmcat_opts+=("$1")
+                shift
+                ;;
+            -i|--ignore)
+                llmcat_opts+=("$1" "$2")
+                shift 2
+                ;;
+            *)
+                if [ -z "$package_name" ]; then
+                    package_name="$1"
+                else
+                    echo "Error: Multiple package names specified" >&2
+                    exit 1
+                fi
+                shift
+                ;;
+        esac
+    done
+    
+    # Check if package name was provided
+    if [ -z "$package_name" ]; then
+        echo "Error: No package name specified" >&2
+        echo "Usage: nmcat [options] <package-name>" >&2
+        exit 1
+    fi
+    
+    # Check if llmcat exists
+    if [ ! -f "$LLMCAT_PATH" ] || [ ! -x "$LLMCAT_PATH" ]; then
+        echo "Error: llmcat not found or not executable at $LLMCAT_PATH" >&2
+        exit 1
+    fi
+    
+    # Find node_modules directory
+    debug "Searching for node_modules directory..."
+    node_modules=$(find_node_modules)
+    
+    if [ $? -ne 0 ]; then
+        echo "Error: No node_modules directory found in parent directories" >&2
+        exit 1
+    fi
+    
+    debug "Found node_modules at: $node_modules"
+    
+    # Check if package exists
+    debug "Looking for package: $package_name"
+    package_path=$(check_package_exists "$node_modules" "$package_name")
+    
+    if [ $? -ne 0 ]; then
+        echo "Error: Package '$package_name' not found in $node_modules" >&2
+        
+        # Suggest similar packages if any exist
+        echo "Available packages:" >&2
+        ls -1 "$node_modules" | head -20 | sed 's/^/  /' >&2
+        
+        exit 1
+    fi
+    
+    debug "Found package at: $package_path"
+    
+    # Call llmcat with the package directory
+    debug "Executing: $LLMCAT_PATH ${llmcat_opts[@]} $package_path"
+    "$LLMCAT_PATH" "${llmcat_opts[@]}" "$package_path"
+}
+
+main "$@"
