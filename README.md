@@ -1,13 +1,38 @@
-# nmcat - Node Modules Package Content Copier
+# nmcat - Node Module Context Sharing for LLMs
 
-A command-line tool that copies node module package contents to your clipboard using [llmcat](https://github.com/azer/llmcat).
+A command-line tool that instantly copies node module package contents to your clipboard for sharing with Large Language Models (LLMs). Perfect for longer, more productive conversations with AI assistants like Gemini 2.0 Flash, Claude, and GPT-4.
+
+## Why nmcat?
+
+Modern LLMs excel at understanding and working with large codebases when given proper context. **Gemini 2.0 Flash** in particular shines with its massive context window, allowing you to share entire npm packages and maintain deep, technical conversations about your dependencies. 
+
+Instead of manually copying files or struggling to describe package internals, `nmcat` lets you instantly share complete package context with your LLM - enabling it to:
+- Debug dependency issues with full visibility
+- Suggest optimizations based on actual implementation
+- Write code that properly integrates with your packages
+- Understand the nuances of how libraries actually work
+
+## How It Works
+
+`nmcat` leverages the powerful [llmcat](https://github.com/azer/llmcat) tool to handle the heavy lifting of:
+- Intelligently traversing package directories
+- Filtering out unnecessary files (tests, docs, build artifacts)
+- Formatting code for optimal LLM consumption
+- Managing clipboard operations across platforms
+
+We simply provide a convenient wrapper that:
+1. Automatically locates your `node_modules` directory
+2. Finds the specific package you want to share
+3. Uses `llmcat` to process and copy the relevant source code
+4. Puts everything in your clipboard, ready to paste into your LLM conversation
 
 ## Features
 
-- 🔍 Automatically finds `node_modules` by searching up the directory tree
-- 📋 Copies package contents to clipboard for easy sharing
-- 🐟 Smart Fish shell completions with instant response
-- 🚀 Supports all llmcat options (print, tree view, ignore patterns, etc.)
+- 🤖 **LLM-Optimized**: Formatted output designed for AI comprehension
+- 📦 **Smart Package Discovery**: Automatically finds node_modules in parent directories
+- 🎯 **Focused Content**: Shares only relevant source code, not bloat
+- 🐟 **Instant Fish Completions**: Tab-complete package names without delays
+- 🔧 **Full llmcat Power**: Access all underlying options (tree view, ignore patterns, etc.)
 
 ## Installation
 
@@ -16,25 +41,48 @@ A command-line tool that copies node module package contents to your clipboard u
 ```
 
 The installer will:
-
 1. Create a symlink in `/usr/local/bin/nmcat`
 2. Install smart Fish completions (if Fish is detected)
 
 ## Usage
 
+### Basic LLM Workflow
+
 ```bash
-# Copy package contents to clipboard
+# Copy a package to share with your LLM
 nmcat express
 
-# Print package contents while copying
+# Then paste into your LLM chat:
+# "Here's the Express source code: [paste]. Can you help me understand
+# how middleware chaining works internally?"
+```
+
+### Advanced Options
+
+```bash
+# Preview what you're copying (useful for large packages)
 nmcat -p lodash
 
-# Only show directory tree
+# Just show the directory structure first
 nmcat -t react
 
-# Print without copying to clipboard
+# Print without copying (for reviewing before sharing)
 nmcat -P axios
+
+# Include test files for comprehensive context
+nmcat -i '' jest
 ```
+
+## Perfect for Gemini 2.0 Flash
+
+Gemini 2.0 Flash's massive context window means you can share entire npm packages and maintain conversation continuity. Example workflow:
+
+1. Share your main package: `nmcat express`
+2. Add middleware packages: `nmcat body-parser`, `nmcat cors`
+3. Include your app code
+4. Have a deep technical discussion with full context
+
+The LLM can now see exactly how these packages work together, spot potential issues, and suggest improvements based on actual implementation details rather than assumptions.
 
 ## Fish Completions
 
@@ -64,8 +112,16 @@ The Fish completions are optimized for performance, even with thousands of packa
 
 ## Requirements
 
-- [llmcat](https://github.com/azer/llmcat) must be installed
+- [llmcat](https://github.com/azer/llmcat) - The powerful engine that makes this possible
 - Fish shell (optional, for completions)
+
+## Tips for LLM Conversations
+
+1. **Start with context**: Share the main package first before asking questions
+2. **Layer dependencies**: Add related packages to build comprehensive context
+3. **Be specific**: LLMs perform better when they can see actual code vs. descriptions
+4. **Use tree view**: `nmcat -t package` helps you and the LLM understand structure
+5. **Keep conversations focused**: Even with large context windows, focused discussions yield better results
 
 ## License
 
