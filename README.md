@@ -64,7 +64,7 @@ The Fish completions are optimized for performance, even with thousands of packa
 
 ## Requirements
 
-- [llmcat](https://github.com/kevincharm/llmcat) must be installed
+- [llmcat](https://github.com/azer/llmcat) must be installed
 - Fish shell (optional, for completions)
 
 ## License
