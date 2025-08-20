@@ -1,10 +1,10 @@
 # nmcat - Node Module Context Sharing for LLMs
 
-A command-line tool that instantly copies node module package contents to your clipboard for sharing with Large Language Models (LLMs). Perfect for longer, more productive conversations with AI assistants like Gemini 2.5 Pro and Claude 4 Opus.
+A command-line tool that instantly copies node module package contents to your clipboard for sharing with LLMs. Perfect for longer, more productive conversations with AI assistants like Gemini 2.5 Pro and Claude 4 Opus.
 
 ## Why nmcat?
 
-Modern LLMs excel at understanding and working with large codebases when given proper context. **Gemini 2.0 Flash** in particular shines with its massive context window, allowing you to share entire npm packages and maintain deep, technical conversations about your dependencies. 
+Modern LLMs excel at understanding and working with large codebases when given proper context. **Gemini 2.5 Pro** in particular shines with its massive context window, allowing you to share entire npm packages and maintain deep, technical conversations about your dependencies. 
 
 Instead of manually copying files or struggling to describe package internals, `nmcat` lets you instantly share complete package context with your LLM - enabling it to:
 - Debug dependency issues with full visibility
@@ -73,9 +73,9 @@ nmcat -P axios
 nmcat -i '' jest
 ```
 
-## Perfect for Gemini 2.0 Flash
+## Perfect for Gemini 2.5 Pro
 
-Gemini 2.0 Flash's massive context window means you can share entire npm packages and maintain conversation continuity. Example workflow:
+Gemini 2.5 Pro's massive context window means you can share entire npm packages and maintain conversation continuity. Example workflow:
 
 1. Share your main package: `nmcat express`
 2. Add middleware packages: `nmcat body-parser`, `nmcat cors`
