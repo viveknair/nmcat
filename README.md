@@ -1,6 +1,6 @@
 # nmcat - Node Module Context Sharing for LLMs
 
-A command-line tool that instantly copies node module package contents to your clipboard for sharing with Large Language Models (LLMs). Perfect for longer, more productive conversations with AI assistants like Gemini 2.0 Flash, Claude, and GPT-4.
+A command-line tool that instantly copies node module package contents to your clipboard for sharing with Large Language Models (LLMs). Perfect for longer, more productive conversations with AI assistants like Gemini 2.5 Pro and Claude 4 Opus.
 
 ## Why nmcat?
 
